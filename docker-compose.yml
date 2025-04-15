@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  server-1:
+    build: ./simulated_server
+    container_name: server-1
+    ports:
+      - "8081:80"
+
+  server-2:
+    build: ./simulated_server
+    container_name: server-2
+    ports:
+      - "8082:80"
+
+  server-3:
+    build: ./simulated_server
+    container_name: server-3
+    ports:
+      - "8083:80"
+
+  optimizer:
+    build: ./ga_controller
+    container_name: ga-controller
+    depends_on:
+      - server-1
+      - server-2
+      - server-3
