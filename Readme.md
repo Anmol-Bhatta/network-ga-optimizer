@@ -72,3 +72,10 @@ network-ga-project/
 ├── docker-compose.yml
 └── .gitignore
 ```
+
+
+Next plan:
+- [ ] Add Prometheus & Grafana for observability
+- [ ] Log best GA results to CSV
+- [ ] Add REST API trigger for GA runs
+- [ ] Compare with round-robin baseline
