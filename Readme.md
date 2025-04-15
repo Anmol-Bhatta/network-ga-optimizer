@@ -8,7 +8,7 @@ Tech Stack
 
 ---
 
-## 🛠️ Setup Instructions
+## Setup Instructions
 
 ### Prerequisites
 - Docker Desktop installed and running
