@@ -54,7 +54,7 @@ This project simulates server-side traffic handling and applies a **Genetic Algo
 
 ---
 
-## 🚀 Run the System
+## Run the System
 ```bash
 # From root directory
 $ docker compose up --build
@@ -77,7 +77,7 @@ $ docker compose up --build
 
 ---
 
-## 🔧 Next Steps
+##  Next Steps
 - [ ] Add alerts in Prometheus + Grafana
 - [ ] Improve GA fitness function (multi-objective)
 - [ ] Persist GA best configs
@@ -85,9 +85,4 @@ $ docker compose up --build
 - [ ] Deploy to Kubernetes
 
 ---
-
-## 🙌 Credits
-Built by Anmol Bhatta as part of a hands-on DevOps and Cloud optimization project.
-
-Let me know if you want to push this live or deploy a CI/CD pipeline!
 
