@@ -1,81 +1,93 @@
-Tech Stack
+# Network Traffic Optimizer with Genetic Algorithm
 
-- Python 3.13
-- Flask (for simulated servers)
-- PyGAD (for genetic optimization)
-- Docker & Docker Compose
-- YAML for config
+This project simulates server-side traffic handling and applies a **Genetic Algorithm (GA)** to optimize traffic distribution across multiple Flask-based simulated servers. The system uses **Prometheus** for metric scraping and **Grafana** for monitoring and visualization.
 
 ---
 
-## Setup Instructions
+## Components
 
-### Prerequisites
-- Docker Desktop installed and running
-- Git installed
+### 1. `simulated_server/`
+- A Flask app that simulates traffic processing on each server
+- Exposes Prometheus metrics like:
+  - `latency_ms`
+  - `throughput_mbps`
+  - `error_rate`
+  - `avg_load`
+  - `load_variance`
 
----
+### 2. `ga_controller/`
+- Genetic Algorithm optimizer that:
+  - Sends load based on evolving weights
+  - Evaluates response times, throughput, and error metrics
+  - Finds optimal traffic split across servers
 
-##Step-by-Step Setup
+### 3. `load_driver/`
+- Sends test traffic (simulated clients) to endpoints
+- Works in coordination with the optimizer
 
-### 1. Clone the Repo
-```bash
-git clone https://github.com/yourusername/network-ga-optimizer.git
-cd network-ga-optimizer
-```
+### 4. `prometheus/`
+- Prometheus config to scrape all servers at `/metrics`
 
-### 2. Start Docker Containers
-This will start 3 server containers + the optimizer controller:
-```bash
-docker compose up --build
-```
-Or to run in background:
-```bash
-docker compose up -d
-```
-
-### 3. (Optional) Re-run the GA Optimizer Manually
-```bash
-docker compose run optimizer
-```
-
-### 4. View Logs
-```bash
-docker logs ga-controller
-```
+### 5. `grafana/`
+- Pre-provisioned dashboard to visualize:
+  - Real-time `latency_ms`, `error_rate`, `throughput_mbps`, `traffic_load`
 
 ---
 
-Configuration
-Edit `config.yaml` to adjust:
-- Number of generations
-- Traffic allocation weights (latency, throughput, etc.)
-- Mutation rate
-
+## How it Works
+1. Each server simulates traffic response behavior.
+2. Optimizer runs GA to find best traffic allocation percentages.
+3. Load Driver mimics client requests using that allocation.
+4. Prometheus scrapes metrics every 5s.
+5. Grafana auto-loads dashboard to show panel data for all metrics.
 
 ---
 
-## 📁 Project Structure
-```
-network-ga-project/
-├── ga_controller/
-│   ├── main.py
-│   ├── ga_runner.py
-│   ├── fitness_evaluator.py
-│   ├── server_client.py
-│   ├── config.yaml
-│   ├── Dockerfile
-│   └── requirements.txt
-├── simulated_server/
-│   ├── server-app.py
-│   └── Dockerfile
-├── docker-compose.yml
-└── .gitignore
+## Metrics Breakdown
+| Metric              | Description                                |
+|---------------------|--------------------------------------------|
+| `latency_ms`        | Current simulated request latency          |
+| `throughput_mbps`   | Simulated server throughput                |
+| `error_rate`        | Probability of overload/error response     |
+| `avg_load`          | Average load based on recent requests      |
+| `load_variance`     | Variance of load for stability tracking    |
+
+---
+
+## 🚀 Run the System
+```bash
+# From root directory
+$ docker compose up --build
 ```
 
+- Grafana: [http://localhost:3000](http://localhost:3000) (admin/admin)
+- Prometheus: [http://localhost:9090](http://localhost:9090)
 
-Next plan:
-- [ ] Add Prometheus & Grafana for observability
-- [ ] Log best GA results to CSV
-- [ ] Add REST API trigger for GA runs
-- [ ] Compare with round-robin baseline
+---
+
+##Folder Structure
+```
+├── simulated_server/     # Flask servers with Prometheus metrics
+├── ga_controller/        # GA optimizer logic
+├── load_driver/          # Automated traffic simulator
+├── prometheus/           # prometheus.yml config
+├── grafana/              # dashboard.json and provisioning files
+└── docker-compose.yml    # Orchestrates the setup
+```
+
+---
+
+## 🔧 Next Steps
+- [ ] Add alerts in Prometheus + Grafana
+- [ ] Improve GA fitness function (multi-objective)
+- [ ] Persist GA best configs
+- [ ] Export metrics to CSV
+- [ ] Deploy to Kubernetes
+
+---
+
+## 🙌 Credits
+Built by Anmol Bhatta as part of a hands-on DevOps and Cloud optimization project.
+
+Let me know if you want to push this live or deploy a CI/CD pipeline!
+
