@@ -86,8 +86,4 @@ $ docker compose up --build
 
 ---
 
-## 🙌 Credits
-Built by Anmol Bhatta as part of a hands-on DevOps and Cloud optimization project.
-
-Let me know if you want to push this live or deploy a CI/CD pipeline!
 
