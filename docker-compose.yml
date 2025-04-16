@@ -42,6 +42,7 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-storage:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     depends_on:
@@ -60,11 +61,27 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
-      - ./grafana/dashboard.json:/etc/grafana/provisioning/dashboards/dashboard.json
+      - grafana-storage:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      
     depends_on:
       - prometheus
     networks:
       - ga-network
+
+  load-driver:
+    build: ./load_driver
+    container_name: load-driver
+    depends_on:
+      - server-1
+      - server-2
+      - server-3
+    networks:
+      - ga-network
+
+volumes:
+  grafana-storage:
+  prometheus-storage:
 
 networks:
   ga-network:
