@@ -10,8 +10,8 @@ ga:
   mutation_percent: 30
 
 weights:
-  latency: 0.4
-  throughput: 0.4
+  latency: 0.1
+  throughput: 0.7
   error_rate: 0.1
   load_variance: 0.1
 

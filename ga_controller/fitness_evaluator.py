@@ -44,5 +44,5 @@ def evaluate_solution(solution):
         (avg_error * 100 * WEIGHTS["error_rate"]) -
         (load_variance * 100 * WEIGHTS["load_variance"])
     )
-
+    print(f"Raw fitness score: {score}")
     return max(score, 0)

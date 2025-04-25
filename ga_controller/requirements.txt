@@ -1,3 +1,4 @@
 pygad
 pyyaml
 requests
+matplotlib

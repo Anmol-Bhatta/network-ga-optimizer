@@ -34,6 +34,8 @@ services:
       - server-3
     networks:
       - ga-network
+    volumes:
+      - ./ga_controller:/app/ga_controller
 
   prometheus:
     image: prom/prometheus:latest

@@ -18,6 +18,10 @@ def fitness_func(ga_instance, solution, solution_idx):
 
 
 def run_ga():
+    best_fitness_per_gen = []
+    def on_generation(ga):
+        best_fitness_per_gen.append(ga.best_solution()[1])
+
     ga_instance = pygad.GA(
         num_generations=GA_CONFIG["generations"],
         num_parents_mating=GA_CONFIG["parents_mating"],
@@ -28,8 +32,10 @@ def run_ga():
         init_range_high=1.0,
         mutation_percent_genes=GA_CONFIG["mutation_percent"],
         mutation_type="random",
-        gene_space={'low': 0.1, 'high': 1.0}
+        gene_space={'low': 0.1, 'high': 1.0},
+        on_generation=on_generation
     )
 
     ga_instance.run()
+    ga_instance.best_fitness_per_gen = best_fitness_per_gen
     return ga_instance
