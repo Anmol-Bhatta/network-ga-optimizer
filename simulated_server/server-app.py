@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify, Response
 from prometheus_client import Gauge, generate_latest, CONTENT_TYPE_LATEST
 import time
@@ -11,8 +12,8 @@ app = Flask(__name__)
 # Configurable Constants
 # ----------------------
 MAX_HISTORY = 10
-TRAFFIC_CAP = 40  # Mbps limit per server
-BASE_LATENCY = random.uniform(20, 40)  # ms baseline per container
+TRAFFIC_CAP = float(os.environ.get("TRAFFIC_CAP", 40))  # Mbps limit per server
+BASE_LATENCY = float(os.environ.get("BASE_LATENCY", random.uniform(20, 40)))  # ms baseline per container
 
 # ----------------------
 # Metrics
@@ -38,12 +39,27 @@ def dynamic_latency(base_latency, current_traffic):
     return base_latency + fluctuation + overload_penalty
 
 # ----------------------
-# Helper: Dynamic throughput calculation
+# Helper: Nonlinear error rate and throughput penalty
 # ----------------------
-def dynamic_throughput(load):
-    base = min(load, TRAFFIC_CAP)
+def nonlinear_error_rate(traffic):
+    if traffic > TRAFFIC_CAP:
+        # Immediate overload if over cap
+        return 1.0
+    elif traffic > 0.8 * TRAFFIC_CAP:
+        # Sharp increase as traffic nears cap
+        return 0.5 * ((traffic - 0.8 * TRAFFIC_CAP) / (0.2 * TRAFFIC_CAP))
+    else:
+        return 0.0
+
+def nonlinear_throughput(load):
+    # Throughput drops sharply as load exceeds 80% of cap
+    if load > 0.8 * TRAFFIC_CAP:
+        penalty = (load - 0.8 * TRAFFIC_CAP) * 2  # Sharper penalty
+        base = min(load, TRAFFIC_CAP) - penalty
+    else:
+        base = min(load, TRAFFIC_CAP)
     noise = random.uniform(-2, 2)
-    return base + noise
+    return max(base + noise, 0)
 
 # ----------------------
 # Serve endpoint
@@ -63,8 +79,8 @@ def serve():
     avg_load = statistics.mean(load_history)
     load_variance = statistics.variance(load_history) if len(load_history) > 1 else 0.0
     latency = dynamic_latency(BASE_LATENCY, traffic)
-    throughput = dynamic_throughput(traffic)
-    error_rate = min(1.0, max(0, (traffic - TRAFFIC_CAP) / 20))  # penalize overload
+    throughput = nonlinear_throughput(traffic)
+    error_rate = nonlinear_error_rate(traffic)
 
     # Update Prometheus gauges
     latency_gauge.set(latency)

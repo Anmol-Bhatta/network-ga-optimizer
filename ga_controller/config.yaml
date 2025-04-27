@@ -4,15 +4,27 @@ servers:
   - http://server-3:80/serve
 
 ga:
-  generations: 30
-  population_size: 10
-  parents_mating: 4
-  mutation_percent: 30
+  generations: 50
+  population_size: 24   # Increased for more diversity
+  parents_mating: 6
+  mutation_percent: 60  # Increased for more exploration
+  keep_parents: 2
 
 weights:
-  latency: 0.1
-  throughput: 0.7
-  error_rate: 0.1
-  load_variance: 0.1
+  throughput: 2.0
+  latency: 1.2
+  error_rate: 2.0   # Lowered to allow more exploration
+  load_variance: 0.2
+
+# Add weights for weighted round robin (example: based on server capacity)
+weighted_rr_weights:
+  - 1  # Server 1 (weak)
+  - 2  # Server 2 (medium)
+  - 3  # Server 3 (strong)
 
 timeout: 2
+
+min_allocation: 0.05   # Allow more flexibility
+max_allocation: 1.0
+save_plots: true
+plot_dir: "./"

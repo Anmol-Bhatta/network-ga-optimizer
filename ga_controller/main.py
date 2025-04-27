@@ -6,6 +6,8 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 import time
+import requests
+import numpy as np
 
 # Load config
 with open("config.yaml", "r") as f:
@@ -48,25 +50,86 @@ round_robin = [1 / len(SERVERS)] * len(SERVERS)
 round_robin_fitness = evaluate_solution(round_robin)
 print(f"Round Robin Fitness Score: {round(round_robin_fitness, 3)}")
 
+# --- Weighted Round Robin Comparison ---
+# Use weights from config to split traffic proportionally
+weighted_rr_weights = config.get("weighted_rr_weights", [1]*len(SERVERS))
+total_weight = sum(weighted_rr_weights)
+weighted_rr = [w / total_weight for w in weighted_rr_weights]
+weighted_rr_fitness = evaluate_solution(weighted_rr)
+print(f"Weighted Round Robin Fitness Score: {round(weighted_rr_fitness, 3)}")
+
+# --- Per-Server Metrics Comparison ---
+def get_metrics_for_allocation(allocation):
+    metrics = []
+    for i, weight in enumerate(allocation):
+        traffic = weight * 100
+        result = evaluate_solution([weight if j == i else 0 for j in range(len(SERVERS))])
+        metrics.append(result)
+    return metrics
+
+# Helper to get per-server metrics for a given allocation
+def get_server_metrics(allocation):
+    metrics = []
+    for i, weight in enumerate(allocation):
+        traffic = weight * 100
+        response = requests.post(SERVERS[i], json={"traffic_load": traffic}, timeout=2)
+        if response.status_code == 200:
+            metrics.append(response.json())
+        else:
+            metrics.append({"throughput_mbps": 0, "latency_ms": 1000, "error_rate": 1})
+    return metrics
+
+# Get per-server metrics for each method
+methods = {
+    "GA": normalized_best,
+    "Round Robin": [1 / len(SERVERS)] * len(SERVERS),
+    "Weighted RR": weighted_rr
+}
+per_server_metrics = {k: get_server_metrics(v) for k, v in methods.items()}
+
+# Plot per-server metrics (throughput, latency, error rate)
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+metrics_names = ["throughput_mbps", "latency_ms", "error_rate"]
+metrics_labels = ["Throughput (Mbps)", "Latency (ms)", "Error Rate"]
+bar_width = 0.2
+x = np.arange(len(SERVERS))
+
+for idx, (metric, label) in enumerate(zip(metrics_names, metrics_labels)):
+    for i, (method, metrics_list) in enumerate(per_server_metrics.items()):
+        values = [m.get(metric, 0) for m in metrics_list]
+        axes[idx].bar(x + i * bar_width, values, bar_width, label=method)
+    axes[idx].set_xticks(x + bar_width)
+    axes[idx].set_xticklabels([f"Server {i+1}" for i in x])
+    axes[idx].set_title(label)
+    axes[idx].legend()
+    axes[idx].grid(True)
+
+plt.tight_layout()
+per_server_plot_path = os.path.join(os.path.dirname(__file__), "per_server_metrics.png")
+plt.savefig(per_server_plot_path)
+print(f"Saved per-server metrics plot as {per_server_plot_path}")
+
 # --- Visualization ---
 labels = [f"Server {i+1}" for i in range(len(SERVERS))]
 ga_percents = [round(r * 100, 2) for r in normalized_best]
 rr_percents = [100/len(SERVERS)] * len(SERVERS)
+weighted_rr_percents = [round(w * 100, 2) for w in weighted_rr]
 
 x = range(len(SERVERS))
-width = 0.35
+width = 0.25
 fig, ax = plt.subplots()
-rects1 = ax.bar([i - width/2 for i in x], ga_percents, width, label='GA Allocation')
-rects2 = ax.bar([i + width/2 for i in x], rr_percents, width, label='Round Robin')
+rects1 = ax.bar([i - width for i in x], ga_percents, width, label='GA Allocation')
+rects2 = ax.bar([i for i in x], rr_percents, width, label='Round Robin')
+rects3 = ax.bar([i + width for i in x], weighted_rr_percents, width, label='Weighted RR')
 
 ax.set_ylabel('Traffic Allocation (%)')
-ax.set_title('Traffic Allocation: GA vs Round Robin')
+ax.set_title('Traffic Allocation: GA vs RR vs Weighted RR')
 ax.set_xticks(list(x))
 ax.set_xticklabels(labels)
 ax.legend()
 
 # Annotate bars
-for rect in rects1 + rects2:
+for rect in rects1 + rects2 + rects3:
     height = rect.get_height()
     ax.annotate(f'{height:.1f}',
                 xy=(rect.get_x() + rect.get_width() / 2, height),
