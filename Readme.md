@@ -1,6 +1,6 @@
 # Network Traffic Optimizer with Genetic Algorithm
 
-This project simulates server-side traffic handling and applies a **Genetic Algorithm (GA)** to optimize traffic distribution across multiple Flask-based simulated servers. The system uses **Prometheus** for metric scraping and **Grafana** for monitoring and visualization.
+This project simulates server-side traffic handling and applies a Genetic Algorithm (GA) to optimize traffic distribution across multiple Flask-based simulated servers. The system uses Prometheus for metric scraping and Grafana for monitoring and visualization.
 
 ---
 
@@ -54,6 +54,49 @@ This project simulates server-side traffic handling and applies a **Genetic Algo
 
 ---
 
+## Recent Enhancements (2025)
+
+### Genetic Algorithm Optimization
+Early stopping: GA halts if no improvement for 20 generations, saving computation time.
+Nonlinear penalties: Sharper penalties for error rate and throughput as servers approach overload, ensuring realistic adaptation.
+Weighted Round Robin baseline: Added for fair comparison with GA.
+Improved fitness function: Balanced weights for throughput, latency, error rate, and load variance.
+Parameter tuning: Increased population size (24) and mutation rate (60%) for better exploration.
+
+### Visualizations & Analysis
+Fitness over generations: See GA convergence and early stopping in fitness_over_generations.png.
+Traffic allocation comparison: Compare GA, RR, and WRR allocations in traffic_allocation.png.
+Per-server metrics: Visualize throughput, latency, and error rate for each server and method in per_server_metrics.png.
+
+### Experimentation Workflow
+Iteratively refined GA and simulation based on results.
+Quantitative and visual analysis demonstrates GA outperforms both RR and WRR, especially under nonlinear penalties.
+
+---
+
+## How to Run Experiments
+1. **Start all containers:**
+   ```bash
+   docker compose up --build
+   ```
+2. **View real-time metrics:**
+   - Prometheus: [localhost:9090](http://localhost:9090)
+   - Grafana: [localhost:3000](http://localhost:3000)
+3. **Analyze results:**
+   - Plots are saved in `ga_controller/` after each run.
+   - Compare GA, RR, and WRR performance using generated PNGs.
+
+---
+
+## Results Summary (Sample)
+| Method         | Fitness Score | Error Rate | Notes                          |
+|----------------|--------------|------------|---------------------------------|
+| GA             | 47.7         | 0          | Adaptive, avoids overload       |
+| Weighted RR    | 40.3         | 0          | Good, but less adaptive         |
+| Round Robin    | 0            | 0.42       | Overloads weakest server        |
+
+---
+
 ## Run the System
 ```bash
 # From root directory
@@ -77,12 +120,6 @@ $ docker compose up --build
 
 ---
 
-##  Next Steps
-- [ ] Add alerts in Prometheus + Grafana
-- [ ] Improve GA fitness function (multi-objective)
-- [ ] Persist GA best configs
-- [ ] Export metrics to CSV
-- [ ] Deploy to Kubernetes
 
----
 
+For more details, see code comments, experiment plots, and the `ga_controller/` directory.
