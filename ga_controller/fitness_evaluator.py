@@ -37,12 +37,12 @@ def evaluate_solution(solution):
     avg_error = sum(error_rates) / len(error_rates)
     load_variance = statistics.stdev(traffic_distribution) if len(traffic_distribution) > 1 else 0
 
-    # Weighted fitness function
+    # Weighted fitness function (moderate penalties for error and variance)
     score = (
         (avg_throughput * WEIGHTS["throughput"]) -
         (avg_latency * WEIGHTS["latency"]) -
-        (avg_error * 100 * WEIGHTS["error_rate"]) -
-        (load_variance * 100 * WEIGHTS["load_variance"])
+        (avg_error * 20 * WEIGHTS["error_rate"]) -
+        (load_variance * 10 * WEIGHTS["load_variance"])
     )
     print(f"Raw fitness score: {score}")
-    return max(score, 0)
+    return score

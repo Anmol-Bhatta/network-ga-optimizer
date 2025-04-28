@@ -95,7 +95,14 @@ Quantitative and visual analysis demonstrates GA outperforms both RR and WRR, es
 | Weighted RR    | 40.3         | 0          | Good, but less adaptive         |
 | Round Robin    | 0            | 0.42       | Overloads weakest server        |
 
+
+***NOTE:***
+We did not set a fixed random seed in our experiments to allow the genetic algorithm to fully utilize its stochastic nature. This ensures that each run explores different areas of the solution space, providing a more realistic assessment of the algorithm’s average and robust performance, rather than results tied to a single sequence of random events
+Not setting a fixed random seed was necessary to allow the genetic algorithm to fully explore different possible solutions on each run. This helps demonstrate that our method works well on average. 
+
+
 ---
+
 
 ## Run the System
 ```bash

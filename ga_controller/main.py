@@ -56,6 +56,7 @@ weighted_rr_weights = config.get("weighted_rr_weights", [1]*len(SERVERS))
 total_weight = sum(weighted_rr_weights)
 weighted_rr = [w / total_weight for w in weighted_rr_weights]
 weighted_rr_fitness = evaluate_solution(weighted_rr)
+weighted_rr_percents = [round(w * 100, 2) for w in weighted_rr]
 print(f"Weighted Round Robin Fitness Score: {round(weighted_rr_fitness, 3)}")
 
 # --- Per-Server Metrics Comparison ---
@@ -113,7 +114,6 @@ print(f"Saved per-server metrics plot as {per_server_plot_path}")
 labels = [f"Server {i+1}" for i in range(len(SERVERS))]
 ga_percents = [round(r * 100, 2) for r in normalized_best]
 rr_percents = [100/len(SERVERS)] * len(SERVERS)
-weighted_rr_percents = [round(w * 100, 2) for w in weighted_rr]
 
 x = range(len(SERVERS))
 width = 0.25
